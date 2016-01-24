@@ -1,0 +1,30 @@
+@-webkit-viewport	 { width: device-width; }
+@-moz-viewport			{ width: device-width; }
+@-ms-viewport			 { width: device-width; }
+@-o-viewport				{ width: device-width; }
+@viewport					 { width: device-width; }
+
+body{
+	font-family: "Open Sans", Helvetica Neue, Helvetica, Arial, sans-serif;
+	padding: 0px !important;
+}
+
+.padding{
+	padding: 15px;
+}
+
+.error{
+	color: #a94442;
+}
+.center{
+	text-align: center;
+}
+.bold{
+	font-weight: bold;
+}
+.hidden{
+	display: none;
+}
+.show{
+	display: block;
+}
