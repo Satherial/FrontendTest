@@ -11,6 +11,8 @@ var stripDebug = require('gulp-strip-debug');
 var $ = require('gulp-load-plugins')();
 var del = require('del');
 var babel = require('gulp-babel');
+var cjsx = require('gulp-cjsx');
+var coffee = require('gulp-coffee');
 var browserSync = require('browser-sync');
 var rename = require('gulp-rename');
 var es = require('event-stream');
@@ -22,13 +24,19 @@ gulp.task('clean', function(cb) {
 	}, cb);
 });
 
-gulp.task('jsx', function() {
-	return gulp.src('app/scripts/components/**/*.jsx')
-		.pipe(babel({
-			presets: ['react']
-		}))
+gulp.task('cjsx', function() {
+	return gulp.src('app/scripts/components/**/*.cjsx')
+    .pipe(cjsx({bare: true}))
 		.pipe(gulp.dest('.tmp/scripts/components'));
 });
+
+// gulp.task('jsx', function() {
+// 	return gulp.src('app/scripts/components/**/*.jsx')
+// 		.pipe(babel({
+// 			presets: ['react']
+// 		}))
+// 		.pipe(gulp.dest('.tmp/scripts/components'));
+// });
 
 gulp.task('bowerjs', function() {
 	return es.concat(
@@ -72,18 +80,21 @@ gulp.task('bowerjs-noclean', function() {
           .pipe(gulp.dest('.tmp/scripts/bower_components'));
 });
 
-gulp.task('js', function() {
+gulp.task('coffee', function() {
 	return es.concat(
-			gulp.src('app/scripts/*.js')
+			gulp.src('app/scripts/*.coffee')
+		    	.pipe(coffee({bare: true}))
 					.pipe(gulp.dest('.tmp/scripts')),
-			gulp.src('app/scripts/services/*.js')
+			gulp.src('app/scripts/services/*.coffee')
+		    	.pipe(coffee({bare: true}))
 					.pipe(gulp.dest('.tmp/scripts/services')),
-			gulp.src('app/scripts/components/*.js')
+			gulp.src('app/scripts/components/*.coffee')
+		    	.pipe(coffee({bare: true}))
 					.pipe(gulp.dest('.tmp/scripts/components'))
 	);
 });
 
-gulp.task('scripts', ['jsx', 'js', 'bowerjs'], function(cb) {
+gulp.task('scripts', ['cjsx', 'coffee', 'bowerjs'], function(cb) {
 	return cb();
 });
 
@@ -146,11 +157,7 @@ gulp.task('copy-index', function() {
 	return gulp.src('app/*.html').pipe(gulp.dest('.tmp'));
 });
 
-gulp.task('build', ['prepare'], function(cb) {
-	return cb();
-});
-
-gulp.task('prepare', ['copy-resources', 'uglify-scripts', 'minify-styles'], function(cb) {
+gulp.task('build', ['copy-resources', 'uglify-scripts', 'minify-styles'], function(cb) {
 	return cb();
 });
 
@@ -192,8 +199,6 @@ gulp.task('uglify-scripts', ['minify-scripts'], function() {
 
 gulp.task('minify-styles', ['styles'], function() {
 	return gulp.src('.tmp/assets/styles/*.css')
-		.pipe($.csso())
-		.pipe($.concat(appName + '.min.css'))
 		.pipe(gulp.dest('dist/assets/styles'));
 });
 
@@ -202,13 +207,13 @@ gulp.task('assets', function() {
 		.pipe(gulp.dest('.tmp/assets'));
 });
 
-gulp.task('compile-components', function () {
-	return gulp.src('app/scripts/components/**/*.jsx')
-          .pipe(babel({
-          	presets: ['react']
-          }))
-          .pipe(gulp.dest('.tmp/scripts/components'));
-});
+// gulp.task('compile-components', function () {
+// 	return gulp.src('app/scripts/components/**/*.jsx')
+//           .pipe(babel({
+//           	presets: ['react']
+//           }))
+//           .pipe(gulp.dest('.tmp/scripts/components'));
+// });
 
 gulp.task('serve', ['styles', 'scripts', 'images', 'copy-index', 'bowercss-serve'], function () {
   browserSync({
@@ -217,13 +222,11 @@ gulp.task('serve', ['styles', 'scripts', 'images', 'copy-index', 'bowercss-serve
     }
   });
 
-  gulp.watch('.tmp/scripts/components/**/*.jsx', ['compile-components']);
-	gulp.watch('.tmp/scripts/components/**/*.js', ['js']);
-  gulp.watch('.tmp/scripts/services/*.js', ['js']);
-  gulp.watch('.tmp/scripts/*.js', ['js']);
-  gulp.watch('.tmp/scripts/bower_components/**/*.js', ['bowerjs-noclean']);
-  gulp.watch('.tmp/scripts/bower_components/**/*.css', ['bowercss-serve']);
-  gulp.watch('.tmp/assets/**/*.*', ['assets']);
+	gulp.watch('app/scripts/**/*.cjsx', ['scripts']);
+	gulp.watch('app/scripts/**/*.coffee', ['scripts']);
+  gulp.watch('app/scripts/bower_components/**/*.js', ['bowerjs-noclean']);
+  gulp.watch('app/scripts/bower_components/**/*.css', ['bowercss-serve']);
+  gulp.watch('app/assets/**/*.*', ['assets']);
 });
 
 gulp.task('default', ['build'], function(cb) {
